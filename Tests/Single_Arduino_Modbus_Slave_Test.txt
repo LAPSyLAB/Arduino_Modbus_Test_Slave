@@ -1,0 +1,131 @@
+Tests done in 1-1 RS485 setup (Arduino Slave Test Device (with transfer from coils to inputs, Holding to Input registers)
+
+RS485_Modbus_Slave.ino with setup :
+#define MODBUS_SIMPLE_ECHO_DEVICE  1   // just echo coils to inputs and holding regs to input regs
+#define MODBUS_SLAVE_ID 42
+
+Simple Black USB <-> RS485 adapter with QmodMaster SW
+
+------------------------------------------Coils Test ----------------------------------------------
+
+[RTU]>Tx > 09:40:06:039 - 2A  0F  00  00  00  03  01  07  8D  3E   // Write Multiple Coils On On On
+	2A	Slave address	0x2A (42)
+	0F	Function code	0x0F (15) - Write Multiple Coils
+	00 00	Starting address	0x0001 (1)
+	00 03	Quantity	0x0003 (3)
+	01	Byte count	0x01 (1)
+	07	Outputs value	On On On Off Off Off Off Off
+	8D 3E	CRC	0x8D3E (36158)
+
+[RTU]>Rx > 09:40:06:081 - 2A  0F  00  00  00  03  13  D1   // ACK
+	2A	Slave address	0x2A (42)
+	0F	Function code	0x0F (15) - Write Multiple Coils
+	00 00	Starting address	0x0001 (1)
+	00 03	Quantity	0x0003 (3)
+	13 D1	CRC	0x13D1 (5073)
+Sys > 09:40:06:081 - values written correctly.
+-------------------------------------------------------
+
+
+[RTU]>Tx > 09:40:38:338 - 2A  01  00  00  00  03  7A  10  // Read Coils (3)
+	2A	Slave address	0x2A (42)
+	01	Function code	0x01 (1) - Read Coils
+	00 00	Starting address	0x0001 (1)
+	00 03	Quantity	0x0003 (3)
+	7A 10	CRC	0x7A10 (31248)
+
+[RTU]>Rx > 09:40:38:376 - 2A  01  01  07  19  AE         // Response On On On
+	2A	Slave address	0x2A (42)
+	01	Function code	0x01 (1) - Read Coils
+	01	Byte count	0x01 (1)
+	07	Status	On On On Off Off Off Off Off
+	19 AE	CRC	0x19AE (6574)
+-------------------------------------------------------
+
+[RTU]>Tx > 09:40:52:209 - 2A  02  00  00  00  03  3E  10  //  Read Discrete Inputs  (3)
+	2A	Slave address	0x2A (42)
+	02	Function code	0x02 (2) - Read Discrete Inputs
+	00 00	Starting address	0x0001 (1)
+	00 03	Quantity	0x0003 (3)
+	3E 10	CRC	0x3E10 (15888)
+
+[RTU]>Rx > 09:40:52:249 - 2A  02  01  07  E9  AE          // Response On On On
+	2A	Slave address	0x2A (42)
+	02	Function code	0x02 (2) - Read Discrete Inputs
+	01	Byte count	0x01 (1)
+	07	Status	On On On Off Off Off Off Off
+	E9 AE	CRC	0xE9AE (59822)
+-------------------------------------------------------
+
+[RTU]>Tx > 09:41:18:601 - 2A  0F  00  00  00  03  01  04  CD  3F   // Write Multiple Coils Off Off On
+	2A	Slave address	0x2A (42)
+	0F	Function code	0x0F (15) - Write Multiple Coils
+	00 00	Starting address	0x0001 (1)
+	00 03	Quantity	0x0003 (3)
+	01	Byte count	0x01 (1)
+	04	Outputs value	Off Off On Off Off Off Off Off
+	CD 3F	CRC	0xCD3F (52543)
+
+[RTU]>Rx > 09:41:18:645 - 2A  0F  00  00  00  03  13  D1          // ACK
+Sys > 09:41:18:645 - values written correctly.
+-------------------------------------------------------
+
+
+[RTU]>Tx > 09:40:52:209 - 2A  02  00  00  00  03  3E  10  //  Read Discrete Inputs  (3)
+	2A	Slave address	0x2A (42)
+	02	Function code	0x02 (2) - Read Discrete Inputs
+	00 00	Starting address	0x0001 (1)
+	00 03	Quantity	0x0003 (3)
+	3E 10	CRC	0x3E10 (15888)
+	
+[RTU]>Rx > 09:41:33:221 - 2A  02  01  04  A9  AF         // Response Off Off On
+	2A	Slave address	0x2A (42)
+	02	Function code	0x02 (2) - Read Discrete Inputs
+	01	Byte count	0x01 (1)
+	04	Status	Off Off On Off Off Off Off Off
+	A9 AF	CRC	0xA9AF (43439)
+
+
+-------------------------------------------Registers test ----------------------------------------------
+
+[RTU]>Tx > 09:44:41:353 - 2A  10  00  00  00  03  06  00  64  00  65  00  00  E2  BC   // Write Multiple Registers 0x0064 (100), 0x0065 (101), 0x0000 (0)
+	2A	Slave address	0x2A (42)
+	10	Function code	0x10 (16) - Write Multiple Registers
+	00 00	Starting address	0x0001 (1)
+	00 03	Quantity	0x0003 (3)
+	06	Byte count	0x06 (6)
+	00 64 00 65 00 00	Registers value	0x0064 (100), 0x0065 (101), 0x0000 (0)
+	E2 BC	CRC	0xE2BC (58044)
+
+[RTU]>Rx > 09:44:41:400 - 2A  10  00  00  00  03  86  13                               // ACK
+Sys > 09:44:41:400 - values written correctly.
+
+[RTU]>Tx > 09:45:21:818 - 2A  03  00  00  00  03  03  D0                               // Read Holding Registers (3)
+	2A	Slave address	0x2A (42)
+	03	Function code	0x03 (3) - Read Holding Registers
+	00 00	Starting address	0x0001 (1)
+	00 03	Quantity	0x0003 (3)
+	03 D0	CRC	0x03D0 (976)
+
+[RTU]>Rx > 09:45:21:862 - 2A  03  06  00  64  00  65  00  00  AA  53  					// Response  0x0064 (100), 0x0065 (101), 0x0000 (0)
+	2A	Slave address	0x2A (42)
+	03	Function code	0x03 (3) - Read Holding Registers
+	06	Byte count	0x06 (6)
+	00 64 00 65 00 00	Register value	0x0064 (100), 0x0065 (101), 0x0000 (0)
+	AA 53	CRC	0xAA53 (43603)
+
+
+[RTU]>Tx > 09:45:31:877 - 2A  04  00  00  00  03  B6  10                                // Read Input Registers (3) 
+	2A	Slave address	0x2A (42)
+	04	Function code	0x04 (4) - Read Input Registers
+	00 00	Starting address	0x0001 (1)
+	00 03	Quantity	0x0003 (3)
+	B6 10	CRC	0xB610 (46608)
+
+[RTU]>Rx > 09:45:31:919 - 2A  04  06  00  64  00  65  00  00  EB  B5                   //  Response  0x0064 (100), 0x0065 (101), 0x0000 (0)
+	2A	Slave address	0x2A (42)
+	04	Function code	0x04 (4) - Read Input Registers
+	06	Byte count	0x06 (6)
+	00 64 00 65 00 00	Register value	0x0064 (100), 0x0065 (101), 0x0000 (0)
+	EB B5	CRC	0xEBB5 (60341)
+

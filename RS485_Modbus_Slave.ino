@@ -5,17 +5,37 @@
   created 18 July 2018
   by Sandeep Mistry
 
-  Modified by: R.Rozman
-  
+  Modified by: R.Roz
+
+#ifdef MODBUS_SIMPLE_ECHO_DEVICE
     Simple Echo device (maps coils state to inputs and Holding regs to input regs):
         3 COILS Pins    D3-5
         3 PWMs  Pins    D9-11
+        
+#else
         
     Normal Modbus slave device
         3 COILS Pins    D3-5
         3 DInputs Pins  D6,7,8
         3 PWMs  Pins    D9-11
         6 ADCs  Pins    A0-5
+        
+#endif       
+
+Connection to RS845-TTL converter :
+  ○ 4pin header
+    § DI - Driver in (the transmitter pin TX of Arduino)
+    § DE - Driver enable (enabled when this pin is HIGH) - to D2 Arduino (both together DE and RE)
+    § RE - Receiver enable (enabled when this pin is LOW) - to D2 Arduino
+    § RO - Receiver out (the receiver pin RX of Arduino)
+  ○ 4pin header
+    § VCC (+5VDC)  -  to  Arduino 5V
+    § GND (-)      -  to  Arduino GND
+  ○ Screw terminal block
+    § B - Connect to pin B of the other 485 IC
+    § A - Connect to pin A of the other 485 IC
+
+
 */
 
 #include <ArduinoRS485.h> // ArduinoModbus depends on the ArduinoRS485 library */
@@ -113,7 +133,7 @@ void loop() {
         ModbusRTUServer.discreteInputWrite(i, coilValue);
       }
     
-      // map the holiding register values to the input register values
+      // map the holding register values to the input register values
       for (int i = 0; i < numHoldingRegisters; i++) {
         long holdingRegisterValue = ModbusRTUServer.holdingRegisterRead(i);
         analogWrite(9+i, holdingRegisterValue);
